@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+
 	"flag"
 	"fmt"
 	"html/template"
@@ -14,6 +15,7 @@ import (
 	authenticationv1 "k8s.io/api/authentication/v1"
 	apiv1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
@@ -121,6 +123,19 @@ const postTemplate = `
 </html>
 `
 
+const errorTemplate = `
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Error!</title>
+</head>
+<body>
+    <h1>Skipet ditt sankg</h1>
+    <p>{{ .Error }}</p>
+</body>
+</html>
+`
+
 func (a API) IndexHandler(w http.ResponseWriter, r *http.Request) {
 	tmpl := template.Must(template.New("form").Parse(indexTemplate))
 	tmpl.Execute(w, nil)
@@ -131,6 +146,12 @@ func (a API) TeamHandler(w http.ResponseWriter, r *http.Request) {
 	k8sconfig, err := setupTeam(r.Context(), a.client, teamName)
 	if err != nil {
 		a.log.Error("failed creating team", "error", err)
+		tmpl := template.Must(template.New("kube").Parse(errorTemplate))
+		tmpl.Execute(w, map[string]string{
+			"Error": err.Error(),
+		})
+
+		return
 	}
 
 	tmpl := template.Must(template.New("kube").Parse(postTemplate))
@@ -148,7 +169,7 @@ func setupTeam(ctx context.Context, client *kubernetes.Clientset, teamName strin
 	}
 
 	_, err := client.CoreV1().Namespaces().Create(ctx, namespace, metav1.CreateOptions{})
-	if err != nil {
+	if err != nil && !k8serrors.IsAlreadyExists(err) {
 		return "", err
 	}
 
@@ -159,7 +180,7 @@ func setupTeam(ctx context.Context, client *kubernetes.Clientset, teamName strin
 	}
 
 	_, err = client.CoreV1().ServiceAccounts(namespace.Name).Create(ctx, serviceAccount, metav1.CreateOptions{})
-	if err != nil {
+	if err != nil && !k8serrors.IsAlreadyExists(err) {
 		return "", err
 	}
 
@@ -187,7 +208,7 @@ func setupTeam(ctx context.Context, client *kubernetes.Clientset, teamName strin
 	}
 
 	_, err = client.CoreV1().Secrets(namespace.Name).Create(ctx, &secret, metav1.CreateOptions{})
-	if err != nil {
+	if err != nil && !k8serrors.IsAlreadyExists(err) {
 		return "", err
 	}
 
@@ -209,7 +230,7 @@ func setupTeam(ctx context.Context, client *kubernetes.Clientset, teamName strin
 		},
 	}
 	_, err = client.RbacV1().RoleBindings(namespace.Name).Create(ctx, &roleBinding, metav1.CreateOptions{})
-	if err != nil {
+	if err != nil && !k8serrors.IsAlreadyExists(err) {
 		return "", err
 	}
 
