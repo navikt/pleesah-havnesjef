@@ -64,18 +64,80 @@ func main() {
 		panic(err.Error())
 	}
 
-	teamName := "solo"
-	k8sconfig, err := setupTeam(context.Background(), clientset, teamName)
-	if err != nil {
-		panic(err.Error())
+	api := API{
+		log:    log,
+		client: clientset,
 	}
 
-	log.Info("Oppretter kubeconfig", "team", teamName)
-	fmt.Println(k8sconfig)
+	http.HandleFunc("GET /", api.IndexHandler)
+	http.HandleFunc("POST /", api.TeamHandler)
+
+	log.Info("Running on :8080")
+	if err := http.ListenAndServe(":8080", nil); err != nil {
+		panic(err.Error())
+	}
 }
 
-func indexHandler(w http.ResponseWriter, r *http.Request) {
+type API struct {
+	log    *slog.Logger
+	client *kubernetes.Clientset
+}
 
+const indexTemplate = `
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Ut på bølgene blå</title>
+</head>
+<body>
+    <h1>Lagnavn</h1>
+    <form method="POST" action="/">
+        <input type="text" name="team" placeholder="Lagnavn" required>
+        <button type="submit">Submit</button>
+    </form>
+</body>
+</html>
+`
+
+const postTemplate = `
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Kubeconfig for {{ .Team }}</title>
+</head>
+<body>
+    <h1>Kubeconfig for {{ .Team }}</h1>
+    <button onclick="copyToClipboard()">Copy Kubeconfig</button>
+    <pre id="kubeconfig" style="border-radius: .5rem;overflow-x: auto;padding: 1rem;background-color: #24292e;color: #e1e4e8;">{{ .Kubeconfig }}</pre>
+    <a href="/">Back</a>
+    <script>
+      function copyToClipboard() {
+        const pre = document.getElementById('kubeconfig');
+        const text = pre.innerText;
+        navigator.clipboard.writeText(text);
+      }
+    </script>
+</body>
+</html>
+`
+
+func (a API) IndexHandler(w http.ResponseWriter, r *http.Request) {
+	tmpl := template.Must(template.New("form").Parse(indexTemplate))
+	tmpl.Execute(w, nil)
+}
+
+func (a API) TeamHandler(w http.ResponseWriter, r *http.Request) {
+	teamName := r.FormValue("team")
+	k8sconfig, err := setupTeam(r.Context(), a.client, teamName)
+	if err != nil {
+		a.log.Error("failed creating team", "error", err)
+	}
+
+	tmpl := template.Must(template.New("kube").Parse(postTemplate))
+	tmpl.Execute(w, map[string]string{
+		"Kubeconfig": k8sconfig,
+		"Team":       teamName,
+	})
 }
 
 func setupTeam(ctx context.Context, client *kubernetes.Clientset, teamName string) (string, error) {
