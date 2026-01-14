@@ -42,6 +42,8 @@ users:
 `
 
 func main() {
+	log := slog.New(slog.NewTextHandler(os.Stdout, nil))
+
 	var kubeconfig *string
 	if home := homedir.HomeDir(); home != "" {
 		kubeconfig = flag.String("kubeconfig", filepath.Join(home, ".kube", "config"), "(optional) absolute path to the kubeconfig file")
@@ -68,6 +70,7 @@ func main() {
 		panic(err.Error())
 	}
 
+	log.Info("Oppretter kubeconfig", "team", teamName)
 	fmt.Println(k8sconfig)
 }
 
