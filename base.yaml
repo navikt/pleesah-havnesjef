@@ -25,7 +25,7 @@ rules:
   verbs: ["create", "get"]
 # Rettigheter som deltakere får, må også havnesjef ha
 - apiGroups: [""]
-  resources: ["deployments", "pods", "secrets", "services"]
+  resources: ["deployments", "events", "pods", "pods/log", "secrets", "services"]
   verbs: ["create", "get", "list", "watch", "update", "patch", "delete"]
 
 ---
