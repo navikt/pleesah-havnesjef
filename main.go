@@ -48,10 +48,13 @@ func main() {
 	var kubeconfig *string
 	kubeconfigEnv := os.Getenv("KUBECONFIG")
 	if kubeconfigEnv != "" {
+		log.Info("Using config from env")
 		kubeconfig = &kubeconfigEnv
 	} else if home := homedir.HomeDir(); home != "" {
+		log.Info("Using config from .kube")
 		kubeconfig = flag.String("kubeconfig", filepath.Join(home, ".kube", "config"), "(optional) absolute path to the kubeconfig file")
 	} else {
+		log.Info("Using config from flag")
 		kubeconfig = flag.String("kubeconfig", "", "absolute path to the kubeconfig file")
 	}
 	flag.Parse()
