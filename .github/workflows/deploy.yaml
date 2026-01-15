@@ -19,7 +19,7 @@ jobs:
           fetch-depth: 0 # Fetch all history for what-changed action
       - name: Determine what to do
         id: changed-files
-        uses: "nais/what-changed@main"
+        uses: nais/what-changed@bc3dad0463b36ad29044134bba5898f0af73c34c
         with:
           files: .nais.yaml
       - name: Push docker image to GAR
