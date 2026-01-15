@@ -190,6 +190,8 @@ func (a API) TeamHandler(w http.ResponseWriter, r *http.Request) {
 		"Kubeconfig": k8sconfig,
 		"Team":       teamName,
 	})
+
+	a.log.Info("Created new team", "team", teamName)
 }
 
 func setupTeam(ctx context.Context, client *kubernetes.Clientset, teamName string) (string, error) {
