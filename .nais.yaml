@@ -7,7 +7,9 @@ spec:
   accessPolicy:
     outbound:
       external:
-      - host: 34.51.167.42
+      - ipv4: 34.51.167.42
+        ports:
+          - port: 443
   env:
     - name: KUBECONFIG
       value: /var/run/secrets/kube/config
