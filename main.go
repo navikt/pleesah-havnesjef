@@ -132,7 +132,7 @@ const errorTemplate = `
     <title>Error!</title>
 </head>
 <body>
-    <h1>Skipet ditt sankg</h1>
+    <h1>Skipet ditt sank</h1>
     <p>{{ .Error }}</p>
 </body>
 </html>
