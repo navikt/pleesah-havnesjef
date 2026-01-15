@@ -8,6 +8,9 @@ spec:
     outbound:
       external:
       - host: 34.51.167.42
+  env:
+    - name: KUBECONFIG
+      value: /var/run/secrets/kube/config
   filesFrom:
     - secret: pleesah-havnesjef-kubeconfig
       mountPath: /var/run/secrets/kube
