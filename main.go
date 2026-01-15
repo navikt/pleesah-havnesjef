@@ -111,11 +111,37 @@ const postTemplate = `
 <html>
 <head>
     <title>Kubeconfig for {{ .Team }}</title>
+    <style>
+        code {
+            border-radius: .5rem;
+            overflow-x: auto;
+            padding: .25rem;
+            background-color: #24292e;
+            color: #e1e4e8;
+        }
+
+        pre {
+            border-radius: .5rem;
+            overflow-x: auto;
+            padding: 1rem;
+            background-color: #24292e;
+            color: #e1e4e8;"
+        }
+    </style>
 </head>
 <body>
-    <h1>Kubeconfig for {{ .Team }}</h1>
+    <h1>Kubeconfig for ✨{{ .Team }}✨</h1>
+    <p>
+        <ol>
+            <li>Opprett en fil som heter <code>.config</code></li>
+            <li>Lim innholdet nedenfor inn i filen</li>
+            <li>Kjør <code>export KUBECONFIG=./config</code> i din terminal</li>
+        </ol>
+
+        PS: Hvis du lukker terminalen din må du kjøre <code>export KUBECONFIG=./config</code> på nytt.
+    </p>
     <button onclick="copyToClipboard()">Copy Kubeconfig</button>
-    <pre id="kubeconfig" style="border-radius: .5rem;overflow-x: auto;padding: 1rem;background-color: #24292e;color: #e1e4e8;">{{ .Kubeconfig }}</pre>
+    <pre id="kubeconfig">{{ .Kubeconfig }}</pre>
     <a href="/">Back</a>
     <script>
       function copyToClipboard() {
