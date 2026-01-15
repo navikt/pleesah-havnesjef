@@ -133,7 +133,7 @@ const postTemplate = `
     <h1>Kubeconfig for ✨{{ .Team }}✨</h1>
     <p>
         <ol>
-            <li>Opprett en fil som heter <code>.config</code></li>
+            <li>Opprett en fil som heter <code>config</code></li>
             <li>Lim innholdet nedenfor inn i filen</li>
             <li>Kjør <code>export KUBECONFIG=./config</code> i din terminal</li>
         </ol>
