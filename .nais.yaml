@@ -1,0 +1,15 @@
+apiVersion: nais.io/v1alpha1
+kind: Application
+metadata:
+  name: pleesah-havnesjef
+  namespace: leesah-quiz
+spec:
+  accessPolicy:
+    outbound:
+      external:
+      - host: 34.51.167.42
+  filesFrom:
+    - secret: pleesah-havnesjef-kubeconfig
+      mountPath: /var/run/secrets/kube
+  ingresses:
+    - https://pleesah.ansatt.dev.nav.no

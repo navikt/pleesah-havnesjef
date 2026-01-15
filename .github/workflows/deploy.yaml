@@ -1,0 +1,35 @@
+name: Build, push, and deploy
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    name: Build and push Docker container
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
+        with:
+          fetch-depth: 0 # Fetch all history for what-changed action
+      - name: Determine what to do
+        id: changed-files
+        uses: "nais/what-changed@main"
+        with:
+          files: .nais.yaml
+      - name: Push docker image to GAR
+        if: steps.changed-files.outputs.changed != 'only-inputs'
+        uses: nais/docker-build-push@791ebb6f74b82849c742a9bc9c97abe44c6c111f
+        id: docker-build-push
+        with:
+          team: leesah-quiz
+      - uses: nais/deploy/actions/deploy@fa754451577294aae42872a69b888b3470478ec1
+        env:
+          CLUSTER: dev-gcp
+          RESOURCE: .nais.yaml
+          WORKLOAD_IMAGE: ${{ needs.build.outputs.image }}
