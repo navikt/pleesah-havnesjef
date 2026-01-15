@@ -46,7 +46,10 @@ func main() {
 	log := slog.New(slog.NewTextHandler(os.Stdout, nil))
 
 	var kubeconfig *string
-	if home := homedir.HomeDir(); home != "" {
+	kubeconfigEnv := os.Getenv("KUBECONFIG")
+	if kubeconfigEnv != "" {
+		kubeconfig = &kubeconfigEnv
+	} else if home := homedir.HomeDir(); home != "" {
 		kubeconfig = flag.String("kubeconfig", filepath.Join(home, ".kube", "config"), "(optional) absolute path to the kubeconfig file")
 	} else {
 		kubeconfig = flag.String("kubeconfig", "", "absolute path to the kubeconfig file")
