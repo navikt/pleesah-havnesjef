@@ -32,4 +32,4 @@ jobs:
         env:
           CLUSTER: dev-gcp
           RESOURCE: .nais.yaml
-          WORKLOAD_IMAGE: ${{ needs.build.outputs.image }}
+          WORKLOAD_IMAGE: ${{ steps.docker-build-push.outputs.image }}
