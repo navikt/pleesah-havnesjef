@@ -6,6 +6,7 @@ COPY go.sum go.sum
 COPY go.mod go.mod
 RUN go mod download
 
+COPY internal/ internal/
 COPY main.go main.go
 
 RUN CGO_ENABLED=0 go build -o /src/app
