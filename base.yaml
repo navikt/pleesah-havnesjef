@@ -10,6 +10,9 @@ rules:
 - apiGroups: ["apps"]
   resources: ["deployments"]
   verbs: ["create", "get", "list", "watch", "update", "patch", "delete"]
+- apiGroups: ["networking.k8s.io/v1"]
+  resources: ["networkpolicies"]
+  verbs: ["create", "get", "list", "watch", "update", "patch", "delete"]
 
 # Oppsett for Havnesjefen nedenfor
 ---
@@ -43,6 +46,9 @@ rules:
   verbs: ["create", "get", "list", "watch", "update", "patch", "delete"]
 - apiGroups: ["apps"]
   resources: ["deployments"]
+  verbs: ["create", "get", "list", "watch", "update", "patch", "delete"]
+- apiGroups: ["networking.k8s.io/v1"]
+  resources: ["networkpolicies"]
   verbs: ["create", "get", "list", "watch", "update", "patch", "delete"]
 
 ---
