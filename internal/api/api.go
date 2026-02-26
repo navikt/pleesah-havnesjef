@@ -14,6 +14,7 @@ func New(client k8s.Client, log *slog.Logger) api {
 		log: log,
 	}
 
+	http.HandleFunc("GET /api/v1/service/status", a.ServiceRunningHandler)
 	http.HandleFunc("GET /", a.IndexHandler)
 	http.HandleFunc("POST /", a.TeamHandler)
 
