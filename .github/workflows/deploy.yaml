@@ -25,7 +25,7 @@ jobs:
           files: .nais.yaml
       - name: Push docker image to GAR
         if: steps.changed-files.outputs.changed != 'only-inputs'
-        uses: nais/docker-build-push@ae613eff6f44f0323476eda1c3994a7c518761c3
+        uses: nais/docker-build-push@751a312f0803eb96a05a41fadf51be19b7be362c
         id: docker-build-push
         with:
           team: leesah
