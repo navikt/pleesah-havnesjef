@@ -86,35 +86,5 @@ func (c Client) SetupTeam(ctx context.Context, teamName string) (string, error) 
 		return "", err
 	}
 
-	var sb strings.Builder
-	tmpl := template.Must(template.New("kubeconfig").Parse(kubeconfigTemplate))
-	tmpl.Execute(&sb, map[string]string{
-		"Name":     teamName,
-		"Token":    token.Status.Token,
-		"Endpoint": c.Endpoint,
-		"CA":       c.CA,
-	})
-
-	return sb.String(), nil
+	return createKubeconfig(teamName, token.Status.Token, c.Endpoint, c.CA)
 }
-
-const kubeconfigTemplate = `apiVersion: v1
-clusters:
-- cluster:
-    certificate-authority-data: {{ .CA }}
-    server: https://{{ .Endpoint }}
-  name: pleesah
-contexts:
-- context:
-    cluster: pleesah
-    namespace: {{ .Name }}
-    user: {{ .Name }}
-  name: pleesah
-current-context: pleesah
-kind: Config
-preferences: {}
-users:
-- name: {{ .Name }}
-  user:
-    token: {{ .Token }}
-`

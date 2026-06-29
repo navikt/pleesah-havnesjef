@@ -1,7 +1,6 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"log/slog"
 	"os"
@@ -17,20 +16,6 @@ import (
 func main() {
 	log := slog.New(slog.NewTextHandler(os.Stdout, nil))
 
-	var kubeconfig *string
-	kubeconfigEnv := os.Getenv("KUBECONFIG")
-	if kubeconfigEnv != "" {
-		log.Info("Using config from env")
-		kubeconfig = &kubeconfigEnv
-	} else if home := homedir.HomeDir(); home != "" {
-		log.Info("Using config from .kube")
-		kubeconfig = flag.String("kubeconfig", filepath.Join(home, ".kube", "config"), "(optional) absolute path to the kubeconfig file")
-	} else {
-		log.Info("Using config from flag")
-		kubeconfig = flag.String("kubeconfig", "", "absolute path to the kubeconfig file")
-	}
-	flag.Parse()
-
 	endpoint := os.Getenv("ENDPOINT")
 	if endpoint == "" {
 		panic(fmt.Errorf("endpoint is not set\n"))
@@ -41,8 +26,10 @@ func main() {
 		panic(fmt.Errorf("ca is not set\n"))
 	}
 
+	kubeconfig := findKubeconfig(log, endpoint, ca)
+
 	// use the current context in kubeconfig
-	config, err := clientcmd.BuildConfigFromFlags("", *kubeconfig)
+	config, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
 	if err != nil {
 		panic(err.Error())
 	}
@@ -56,4 +43,28 @@ func main() {
 	api := api.New(k8s.New(clientset, log.WithGroup("k8s"), endpoint, ca), log.WithGroup("api"))
 
 	api.Run()
+}
+
+func findKubeconfig(log *slog.Logger, endpoint, ca string) string {
+	var kubeconfig string
+	kubeconfigToken := os.Getenv("KUBECONFIG_TOKEN")
+	if kubeconfigToken != "" {
+		log.Info("KUBECONFIG_TOKEN is set, creating kubeconfig")
+		var err error
+		kubeconfig, err = k8s.CreateHavnesjefConfig(kubeconfigToken, endpoint, ca)
+		if err != nil {
+			panic(fmt.Errorf("failed creating kubeconfig: %s", err))
+		}
+	} else {
+		kubeconfigEnv := os.Getenv("KUBECONFIG")
+		if kubeconfigEnv != "" {
+			log.Info("Using config from env")
+			kubeconfig = kubeconfigEnv
+		} else if home := homedir.HomeDir(); home != "" {
+			log.Info("Using config from .kube")
+			kubeconfig = filepath.Join(home, ".kube", "config")
+		}
+	}
+
+	return kubeconfig
 }
