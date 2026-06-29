@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log/slog"
 	"os"
 	"path/filepath"
@@ -30,6 +31,16 @@ func main() {
 	}
 	flag.Parse()
 
+	endpoint := os.Getenv("ENDPOINT")
+	if endpoint == "" {
+		panic(fmt.Errorf("endpoint is not set\n"))
+	}
+
+	ca := os.Getenv("CA")
+	if ca == "" {
+		panic(fmt.Errorf("ca is not set\n"))
+	}
+
 	// use the current context in kubeconfig
 	config, err := clientcmd.BuildConfigFromFlags("", *kubeconfig)
 	if err != nil {
@@ -42,7 +53,7 @@ func main() {
 		panic(err.Error())
 	}
 
-	api := api.New(k8s.New(clientset, log.WithGroup("k8s")), log.WithGroup("api"))
+	api := api.New(k8s.New(clientset, log.WithGroup("k8s"), endpoint, ca), log.WithGroup("api"))
 
 	api.Run()
 }

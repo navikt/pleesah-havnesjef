@@ -7,13 +7,17 @@ import (
 )
 
 type Client struct {
-	client *kubernetes.Clientset
-	log    *slog.Logger
+	client   *kubernetes.Clientset
+	log      *slog.Logger
+	Endpoint string
+	CA       string
 }
 
-func New(client *kubernetes.Clientset, log *slog.Logger) Client {
+func New(client *kubernetes.Clientset, log *slog.Logger, endpoint, ca string) Client {
 	return Client{
-		client: client,
-		log:    log,
+		client:   client,
+		log:      log,
+		Endpoint: endpoint,
+		CA:       ca,
 	}
 }
