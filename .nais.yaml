@@ -7,7 +7,7 @@ spec:
   filesFrom:
     - secret: pleesah-havnesjef
       mountPath: /var/run/secrets/havnesjef
-    - secret: pleesah-havnesjef
+    - configmap: pleesah-havnesjef
       mountPath: /var/run/configmaps/havnesjef
   ingresses:
     - https://pleesah.ansatt.nav.no
