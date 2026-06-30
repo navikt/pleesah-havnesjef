@@ -4,7 +4,7 @@ metadata:
   name: pleesah-havnesjef
   namespace: leesah
 spec:
-  filesFrom:
+  envFrom:
     - secret: pleesah-havnesjef
       mountPath: /var/run/secrets/havnesjef
     - configmap: pleesah-havnesjef
