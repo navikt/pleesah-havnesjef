@@ -31,6 +31,6 @@ jobs:
           team: leesah
       - uses: nais/deploy/actions/deploy@fa754451577294aae42872a69b888b3470478ec1
         env:
-          CLUSTER: dev-gcp
+          CLUSTER: prod-gcp
           RESOURCE: .nais.yaml
           WORKLOAD_IMAGE: ${{ steps.docker-build-push.outputs.image }}
