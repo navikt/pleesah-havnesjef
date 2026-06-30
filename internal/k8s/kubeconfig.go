@@ -10,7 +10,7 @@ import (
 func CreateHavnesjefConfig(token, endpoint, ca string) (string, error) {
 	kubeconfig := createKubeconfig("havnesjef", token, endpoint, ca)
 	path := filepath.Join(os.TempDir(), ".config")
-	err := os.WriteFile(path, []byte(kubeconfig), 0644)
+	err := os.WriteFile(path, []byte(kubeconfig), 0o600)
 
 	return path, err
 }
@@ -18,7 +18,7 @@ func CreateHavnesjefConfig(token, endpoint, ca string) (string, error) {
 func createKubeconfig(team, token, endpoint, ca string) string {
 	var sb strings.Builder
 	tmpl := template.Must(template.New("kubeconfig").Parse(kubeconfigTemplate))
-	tmpl.Execute(&sb, map[string]string{
+	_ = tmpl.Execute(&sb, map[string]string{
 		"Name":     team,
 		"Token":    token,
 		"Endpoint": endpoint,

@@ -35,7 +35,7 @@ type api struct {
 
 func (a api) IndexHandler(w http.ResponseWriter, r *http.Request) {
 	tmpl := template.Must(template.New("form").Parse(indexTemplate))
-	tmpl.Execute(w, nil)
+	_ = tmpl.Execute(w, nil)
 }
 
 func (a api) TeamHandler(w http.ResponseWriter, r *http.Request) {
@@ -44,7 +44,7 @@ func (a api) TeamHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		a.log.Error("failed creating team", "error", err)
 		tmpl := template.Must(template.New("kube").Parse(errorTemplate))
-		tmpl.Execute(w, map[string]string{
+		_ = tmpl.Execute(w, map[string]string{
 			"Error": err.Error(),
 		})
 
@@ -52,7 +52,7 @@ func (a api) TeamHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	tmpl := template.Must(template.New("kube").Parse(postTemplate))
-	tmpl.Execute(w, map[string]string{
+	_ = tmpl.Execute(w, map[string]string{
 		"Kubeconfig": k8sconfig,
 		"Team":       teamName,
 	})

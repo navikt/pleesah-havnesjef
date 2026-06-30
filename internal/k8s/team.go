@@ -3,8 +3,6 @@ package k8s
 import (
 	"context"
 	"fmt"
-	"strings"
-	"text/template"
 
 	authenticationv1 "k8s.io/api/authentication/v1"
 	apiv1 "k8s.io/api/core/v1"
@@ -86,5 +84,5 @@ func (c Client) SetupTeam(ctx context.Context, teamName string) (string, error) 
 		return "", err
 	}
 
-	return createKubeconfig(teamName, token.Status.Token, c.Endpoint, c.CA)
+	return createKubeconfig(teamName, token.Status.Token, c.Endpoint, c.CA), nil
 }
