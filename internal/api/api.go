@@ -21,7 +21,7 @@ func New(client k8s.Client, log *slog.Logger) api {
 	}
 
 	mux := http.NewServeMux()
-	mux.HandleFunc("GET /api/v1/service/status", a.ServiceRunningHandler)
+	mux.HandleFunc("GET /api/v1/status/", a.StatusHandler)
 	mux.HandleFunc("POST /api/v1/team/", a.TeamHandler)
 
 	server := &http.Server{
