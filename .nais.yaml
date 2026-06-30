@@ -10,7 +10,7 @@ spec:
     - secret: pleesah-havnesjef
       mountPath: /var/run/configmaps/havnesjef
   ingresses:
-    - https://pleesah.ansatt.dev.nav.no
+    - https://pleesah.ansatt.nav.no
 
 ---
 apiVersion: networking.k8s.io/v1
