@@ -18,12 +18,12 @@ func main() {
 
 	endpoint := os.Getenv("ENDPOINT")
 	if endpoint == "" {
-		panic(fmt.Errorf("endpoint is not set\n"))
+		panic(fmt.Errorf("ENDPOINT is not set\n"))
 	}
 
 	ca := os.Getenv("CA")
 	if ca == "" {
-		panic(fmt.Errorf("ca is not set\n"))
+		panic(fmt.Errorf("CA is not set\n"))
 	}
 
 	kubeconfig := findKubeconfig(log, endpoint, ca)
