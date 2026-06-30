@@ -20,20 +20,26 @@ func (a *api) StatusHandler(w http.ResponseWriter, r *http.Request) {
 	var err error
 	var running bool
 	switch resource {
-	case "service":
-		running, err = a.k8s.IsServiceRunning(r.Context(), team, name)
-		if err != nil {
-			a.log.Error("failed checking service", "error", err, "team", team, "service", name)
-			http.Error(w, "internal server error", http.StatusInternalServerError)
-			return
-		}
+	case "deployment":
+		running, err = a.k8s.IsPodRunning(r.Context(), team, name)
 	case "pod":
 		running, err = a.k8s.IsPodRunning(r.Context(), team, name)
-		if err != nil {
-			a.log.Error("failed checking pod", "error", err, "team", team, "name", name)
-			http.Error(w, "internal server error", http.StatusInternalServerError)
-			return
-		}
+	case "service":
+		running, err = a.k8s.IsServiceRunning(r.Context(), team, name)
+	}
+
+	if err != nil {
+		a.log.Error("failed checking status", "error", err, "team", team, "name", name, "resources", resource)
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.Header().Set("X-Content-Type-Options", "nosniff")
+		_ = json.NewEncoder(w).Encode(map[string]any{
+			"error":    "internal server error",
+			"message":  err,
+			"resource": resource,
+			"name":     name,
+		})
+		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
 
 	emoji := "❌"
