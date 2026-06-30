@@ -4,17 +4,31 @@ metadata:
   name: pleesah-havnesjef
   namespace: leesah
 spec:
-  accessPolicy:
-    outbound:
-      external:
-      - ipv4: 34.51.167.42
-        ports:
-          - port: 443
-  env:
-    - name: KUBECONFIG
-      value: /var/run/secrets/kube/config
   filesFrom:
-    - secret: pleesah-havnesjef-kubeconfig
-      mountPath: /var/run/secrets/kube
+    - secret: pleesah-havnesjef
+      mountPath: /var/run/secrets/havnesjef
+    - secret: pleesah-havnesjef
+      mountPath: /var/run/configmaps/havnesjef
   ingresses:
     - https://pleesah.ansatt.dev.nav.no
+
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: pleesah-havnesjef
+  namespace: leesah
+spec:
+  podSelector:
+    matchLabels:
+      app: pleesah-havnesjef
+  policyTypes:
+  - Egress
+  egress:
+  - to:
+    - ipBlock:
+        cidr: 34.88.113.215/32
+    ports:
+    - protocol: TCP
+      port: 443
+
