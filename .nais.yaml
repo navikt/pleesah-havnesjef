@@ -6,9 +6,7 @@ metadata:
 spec:
   envFrom:
     - secret: pleesah-havnesjef
-      mountPath: /var/run/secrets/havnesjef
     - configmap: pleesah-havnesjef
-      mountPath: /var/run/configmaps/havnesjef
   ingresses:
     - https://pleesah.ansatt.nav.no
 
