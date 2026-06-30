@@ -1,15 +1,5 @@
 [tools]
 go = "1.26"
-"go:github.com/sethvargo/ratchet" = "0.11.4"
-"aqua:sqlc-dev/sqlc" = "1.31.1"
-
-[tasks."generate:sqlc"]
-description = "Generate Go code from SQL queries using sqlc"
-run = "sqlc generate"
-
-[tasks."ci:ratchet"]
-description = "Pin GitHub Actions versions"
-run = "ratchet pin .github/workflows/*.yaml"
 
 [tasks."check"]
 description = "Run all checks"
@@ -45,7 +35,7 @@ run = "go fix ./..."
 
 [tasks."local"]
 description = "Run Go locally"
-run = "fnox exec -- go run ."
+run = "go run ."
 env._.file = ".env"
 
 [tasks."test"]
