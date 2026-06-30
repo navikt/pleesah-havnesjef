@@ -6,7 +6,8 @@ metadata:
 spec:
   accessPolicy:
     inbound:
-      - application: pleesah-game
+      rules:
+        - application: pleesah-game
   envFrom:
     - secret: pleesah-havnesjef
     - configmap: pleesah-havnesjef
