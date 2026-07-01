@@ -1,6 +1,7 @@
 package api
 
 import (
+	"bytes"
 	"encoding/json"
 	"net/http"
 )
@@ -24,7 +25,8 @@ func (a *api) TeamHandler(w http.ResponseWriter, r *http.Request) {
 	a.log.Info("Created new team", "team", team)
 
 	w.Header().Set("Content-Type", "application/json")
-	_ = json.NewEncoder(w).Encode(map[string]any{
-		"kubeconfig": k8sconfig,
-	})
+
+	buffer := new(bytes.Buffer)
+	err = json.Compact(buffer, []byte(k8sconfig))
+	w.Write(buffer.Bytes())
 }

@@ -28,23 +28,36 @@ func createKubeconfig(team, token, endpoint, ca string) string {
 	return sb.String()
 }
 
-const kubeconfigTemplate = `apiVersion: v1
-clusters:
-- cluster:
-    certificate-authority-data: {{ .CA }}
-    server: https://{{ .Endpoint }}
-  name: pleesah
-contexts:
-- context:
-    cluster: pleesah
-    namespace: {{ .Name }}
-    user: {{ .Name }}
-  name: pleesah
-current-context: pleesah
-kind: Config
-preferences: {}
-users:
-- name: {{ .Name }}
-  user:
-    token: {{ .Token }}
-`
+const kubeconfigTemplate = `{
+    "apiVersion": "v1",
+    "clusters": [
+        {
+            "cluster": {
+                "certificate-authority-data": "{{ .CA }}",
+                "server": "https://{{ .Endpoint }}"
+            },
+            "name": "pleesah"
+        }
+    ],
+    "contexts": [
+        {
+            "context": {
+                "cluster": "pleesah",
+                "namespace": "{{ .Name }}",
+                "user": "pirat"
+            },
+            "name": "pleesah"
+        }
+    ],
+    "current-context": "pleesah",
+    "kind": "Config",
+    "preferences": {},
+    "users": [
+        {
+            "name": "pirat",
+            "user": {
+                "token": "{{ .Token }}"
+            }
+        }
+    ]
+}`

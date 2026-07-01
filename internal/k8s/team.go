@@ -43,6 +43,7 @@ func (c Client) SetupTeam(ctx context.Context, teamName string) (string, error) 
 			ExpirationSeconds: &oneDay,
 		},
 	}
+
 	token, err := c.client.CoreV1().ServiceAccounts(namespace.Name).CreateToken(ctx, serviceAccount.Name, tokenRequest, metav1.CreateOptions{})
 	if err != nil {
 		return "", err
