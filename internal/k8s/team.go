@@ -11,10 +11,28 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+const (
+	PLEESAH_TASK    = "pleesah.io/task"
+	PLEESAH_HEXCODE = "pleesah.io/hexcode"
+)
+
+type Team struct {
+	Name        string   `json:"navn"`
+	Hexcode     string   `json:"hexKode"`
+	Progression []string `json:"progresjon"`
+}
+
 func (c Client) SetupTeam(ctx context.Context, teamName string) (string, error) {
 	namespace := &apiv1.Namespace{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: teamName,
+			Annotations: map[string]string{
+				PLEESAH_TASK:    "0",
+				PLEESAH_HEXCODE: "#123321",
+			},
+			Labels: map[string]string{
+				"player": "true",
+			},
 		},
 	}
 
@@ -86,4 +104,32 @@ func (c Client) SetupTeam(ctx context.Context, teamName string) (string, error) 
 	}
 
 	return createKubeconfig(teamName, token.Status.Token, c.Endpoint, c.CA), nil
+}
+
+func (c Client) ListTeams(ctx context.Context) ([]Team, error) {
+	namespaces, err := c.client.CoreV1().Namespaces().List(ctx, metav1.ListOptions{
+		LabelSelector: "player=true",
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	teams := make([]Team, len(namespaces.Items))
+	for i, item := range namespaces.Items {
+		team := namespaceToTeam(item)
+		teams[i] = team
+	}
+
+	return teams, nil
+}
+
+func namespaceToTeam(namespace apiv1.Namespace) Team {
+	progression := []string{"1,2", "4,8", "9,3"}
+	annotations := namespace.GetAnnotations()
+	return Team{
+		Name:        namespace.Name,
+		Hexcode:     annotations[PLEESAH_HEXCODE],
+		Progression: progression,
+	}
 }

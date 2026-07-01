@@ -41,7 +41,6 @@ func main() {
 	}
 
 	api := api.New(k8s.New(clientset, log.WithGroup("k8s"), endpoint, ca), log.WithGroup("api"))
-
 	api.Run()
 }
 
