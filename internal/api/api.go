@@ -1,6 +1,7 @@
 package api
 
 import (
+	"encoding/json"
 	"log/slog"
 	"net/http"
 	"time"
@@ -42,4 +43,11 @@ func (a api) Run() {
 	if err := a.server.ListenAndServe(); err != nil {
 		panic(err.Error())
 	}
+}
+
+func writeJsonMessage(w http.ResponseWriter, blob map[string]any, statusCode int) {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.Header().Set("X-Content-Type-Options", "nosniff")
+	w.WriteHeader(statusCode)
+	_ = json.NewEncoder(w).Encode(blob)
 }

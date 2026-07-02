@@ -3,6 +3,7 @@ package k8s
 import (
 	"context"
 	"fmt"
+	"strconv"
 
 	authenticationv1 "k8s.io/api/authentication/v1"
 	apiv1 "k8s.io/api/core/v1"
@@ -20,6 +21,36 @@ type Team struct {
 	Name        string   `json:"navn"`
 	Hexcode     string   `json:"hexKode"`
 	Progression []string `json:"progresjon"`
+}
+
+func (c Client) TeamNextTask(ctx context.Context, team string, task int) string {
+	namespace, err := c.GetTeam(ctx, team)
+	if err != nil {
+		c.log.Error("failed fetching team", "error", err, "team", team)
+		// http.Error(w, , http.StatusNotFound)
+		return "team was not found"
+	}
+
+	oldTaskString := namespace.Annotations[PLEESAH_TASK]
+	oldTaskInt, err := strconv.Atoi(oldTaskString)
+	if err != nil {
+		c.log.Error("task is not int", "error", err, "team", team, "task", task)
+		// http.Error(w, ", http.StatusBadRequest)
+		return "can not parse task as int"
+	}
+
+	if task <= oldTaskInt {
+		return "Task was lower than previous task"
+	}
+
+	namespace.Annotations[PLEESAH_TASK] = fmt.Sprint(task)
+	if err := c.UpdateTeam(ctx, namespace); err != nil {
+		c.log.Error("failed updating with new task", "error", err, "team", team, "task", task)
+		//=http.Error(w, , http.StatusInternalServerError)
+		return "failed updating with new task"
+	}
+
+	return "Task was updated"
 }
 
 func (c Client) GetTeam(ctx context.Context, teamName string) (*apiv1.Namespace, error) {

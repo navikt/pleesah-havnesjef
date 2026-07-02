@@ -1,7 +1,6 @@
 package api
 
 import (
-	"encoding/json"
 	"net/http"
 )
 
@@ -13,7 +12,10 @@ func (a *api) StatusHandler(w http.ResponseWriter, r *http.Request) {
 
 	if team == "" || name == "" || resource == "" {
 		a.log.Error("missing team, name, resource query parameter", "team", team, "name", name, "resource", resource)
-		http.Error(w, "missing team, name, resource query parameter", http.StatusBadRequest)
+		writeJsonMessage(w, map[string]any{
+			"err": "missing team, name, resource query parameter",
+		}, http.StatusBadRequest)
+
 		return
 	}
 
@@ -30,15 +32,12 @@ func (a *api) StatusHandler(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		a.log.Error("failed checking status", "error", err, "team", team, "name", name, "resources", resource)
-		w.Header().Set("Content-Type", "application/json; charset=utf-8")
-		w.Header().Set("X-Content-Type-Options", "nosniff")
-		_ = json.NewEncoder(w).Encode(map[string]any{
-			"error":    "internal server error",
-			"message":  err,
+		writeJsonMessage(w, map[string]any{
+			"error":    err,
 			"resource": resource,
 			"name":     name,
-		})
-		w.WriteHeader(http.StatusInternalServerError)
+		}, http.StatusInternalServerError)
+
 		return
 	}
 
@@ -47,10 +46,9 @@ func (a *api) StatusHandler(w http.ResponseWriter, r *http.Request) {
 		emoji = "✅"
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	_ = json.NewEncoder(w).Encode(map[string]any{
+	writeJsonMessage(w, map[string]any{
 		"running":  emoji,
 		"resource": resource,
 		"name":     name,
-	})
+	}, http.StatusOK)
 }
