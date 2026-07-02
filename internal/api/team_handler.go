@@ -3,6 +3,7 @@ package api
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 )
@@ -11,6 +12,7 @@ func (a *api) TeamHandler() http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("POST /{team}/create", a.teamCreate)
 	mux.HandleFunc("POST /{team}/next-task", a.teamNextTask)
+	mux.HandleFunc("PUT /{team}/coordinates", a.teamAddCoordinates)
 
 	return mux
 }
@@ -35,6 +37,44 @@ func (a *api) teamCreate(w http.ResponseWriter, r *http.Request) {
 	buffer := new(bytes.Buffer)
 	err = json.Compact(buffer, []byte(k8sconfig))
 	w.Write(buffer.Bytes())
+}
+
+// Example: PUT /api/v1/team/{team}/coordinates
+// Payload: {x: 0, y: 1}
+func (a *api) teamAddCoordinates(w http.ResponseWriter, r *http.Request) {
+	team := r.PathValue("team")
+	type Coordinates struct {
+		X int
+		Y int
+	}
+
+	var coordinates Coordinates
+	if err := json.NewDecoder(r.Body).Decode(&coordinates); err != nil {
+		a.log.Error("failed parsing body", "team", team, "error", err)
+		writeJsonMessage(w, map[string]any{
+			"error": "failed parsing body",
+		}, http.StatusBadRequest)
+
+		return
+	}
+	defer r.Body.Close()
+	minifiedCoordinates := fmt.Sprintf("%d,%d", coordinates.X, coordinates.Y)
+
+	if err := a.k8s.TeamAddCoordinates(r.Context(), team, minifiedCoordinates); err != "" {
+		writeJsonMessage(w, map[string]any{
+			"error":       err,
+			"team":        team,
+			"coordinates": minifiedCoordinates,
+		}, http.StatusInternalServerError)
+
+		return
+	}
+
+	writeJsonMessage(w, map[string]any{
+		"message":     "Coordinates was added",
+		"team":        team,
+		"coordinates": minifiedCoordinates,
+	}, http.StatusOK)
 }
 
 // Example: POST /api/v1/team/{team}/next-task?task=int
