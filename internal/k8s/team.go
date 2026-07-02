@@ -27,7 +27,6 @@ func (c Client) TeamNextTask(ctx context.Context, team string, task int) string 
 	namespace, err := c.GetTeam(ctx, team)
 	if err != nil {
 		c.log.Error("failed fetching team", "error", err, "team", team)
-		// http.Error(w, , http.StatusNotFound)
 		return "team was not found"
 	}
 
@@ -35,12 +34,11 @@ func (c Client) TeamNextTask(ctx context.Context, team string, task int) string 
 	oldTaskInt, err := strconv.Atoi(oldTaskString)
 	if err != nil {
 		c.log.Error("task is not int", "error", err, "team", team, "task", task)
-		// http.Error(w, ", http.StatusBadRequest)
-		return "can not parse task as int"
+		return fmt.Sprintf("failed parsing old task as int: %s", &oldTaskString)
 	}
 
 	if task <= oldTaskInt {
-		return "Task was lower than previous task"
+		return "task was lower than previous task"
 	}
 
 	namespace.Annotations[PLEESAH_TASK] = fmt.Sprint(task)
@@ -50,7 +48,7 @@ func (c Client) TeamNextTask(ctx context.Context, team string, task int) string 
 		return "failed updating with new task"
 	}
 
-	return "Task was updated"
+	return ""
 }
 
 func (c Client) GetTeam(ctx context.Context, teamName string) (*apiv1.Namespace, error) {
