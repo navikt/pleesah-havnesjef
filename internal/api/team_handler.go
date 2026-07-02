@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"regexp"
 	"strconv"
-	"strings"
 )
 
 func (a *api) TeamHandler() http.Handler {
@@ -34,7 +33,6 @@ func (a *api) teamCreate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	hexcode := r.URL.Query().Get("hex")
-	hexcode = strings.ToUpper(hexcode)
 	if !validateHexcode(hexcode) {
 		a.log.Error("hex is not valid", "hex", hexcode)
 		writeJsonMessage(w, map[string]any{
@@ -75,11 +73,11 @@ func (a *api) teamCreate(w http.ResponseWriter, r *http.Request) {
 }
 
 func validateTeam(team string) bool {
-	return regexp.MustCompile(`^(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,63}$`).Match([]byte(team))
+	return regexp.MustCompile(`^[a-zA-Z0-9-]{2,63}$`).Match([]byte(team))
 }
 
 func validateHexcode(hex string) bool {
-	return regexp.MustCompile(`/^#?([A-F0-9]{6}|[A-F0-9]{3})$/`).Match([]byte(hex))
+	return regexp.MustCompile(`^#?(?:[a-fA-F0-9]{6}|[a-fA-F0-9]{3})$`).Match([]byte(hex))
 }
 
 // Example: PUT /api/v1/team/{team}/coordinates
