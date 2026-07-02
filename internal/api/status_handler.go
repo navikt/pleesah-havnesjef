@@ -23,7 +23,7 @@ func (a *api) StatusHandler(w http.ResponseWriter, r *http.Request) {
 	var running bool
 	switch resource {
 	case "deployment":
-		running, err = a.k8s.IsPodRunning(r.Context(), team, name)
+		running, err = a.k8s.IsDeploymentRunning(r.Context(), team, name)
 	case "pod":
 		running, err = a.k8s.IsPodRunning(r.Context(), team, name)
 	case "service":
