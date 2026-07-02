@@ -22,7 +22,6 @@ func New(client k8s.Client, log *slog.Logger) api {
 	}
 
 	mux := http.NewServeMux()
-	mux.HandleFunc("GET /api/v1/status/", a.StatusHandler)
 	mux.Handle("/api/v1/team/", http.StripPrefix("/api/v1/team", a.TeamHandler()))
 	mux.HandleFunc("GET /api/v1/teams", a.TreasureMapHandler)
 

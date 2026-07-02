@@ -2,18 +2,29 @@ package api
 
 import (
 	"net/http"
+	"slices"
 )
 
-// Example: GET /api/v1/status/service?team=team-a&service=my-service
-func (a *api) StatusHandler(w http.ResponseWriter, r *http.Request) {
-	team := r.URL.Query().Get("team")
-	name := r.URL.Query().Get("name")
-	resource := r.URL.Query().Get("resource")
+// Example: GET /api/v1/{team}/status/{deployment|pod|service}/?name={string}
+func (a *api) teamResourceStatus(w http.ResponseWriter, r *http.Request) {
+	team := r.PathValue("team")
+	resource := r.PathValue("resource")
+	log := a.log.With("team", team, "resource", resource)
 
-	if team == "" || name == "" || resource == "" {
-		a.log.Error("missing team, name, resource query parameter", "team", team, "name", name, "resource", resource)
+	if !slices.Contains([]string{"deployment", "pod", "service"}, resource) {
+		log.Error("resource is not valid")
 		writeJsonMessage(w, map[string]any{
-			"err": "missing team, name, resource query parameter",
+			"err": "resource is not valid",
+		}, http.StatusBadRequest)
+
+		return
+	}
+
+	name := r.URL.Query().Get("name")
+	if name == "" {
+		log.Error("missing name query parameter", "name", name)
+		writeJsonMessage(w, map[string]any{
+			"err": "missing name query parameter",
 		}, http.StatusBadRequest)
 
 		return

@@ -14,6 +14,7 @@ func (a *api) TeamHandler() http.Handler {
 	mux.HandleFunc("POST /{team}/create", a.teamCreate)
 	mux.HandleFunc("POST /{team}/next-task", a.teamNextTask)
 	mux.HandleFunc("PUT /{team}/coordinates", a.teamAddCoordinates)
+	mux.HandleFunc("GET /{team}/status/{resource}", a.teamResourceStatus)
 
 	return mux
 }
