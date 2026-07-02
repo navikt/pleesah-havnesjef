@@ -22,6 +22,10 @@ type Team struct {
 	Progression []string `json:"progresjon"`
 }
 
+func (c Client) GetTeam(ctx context.Context, teamName string) (*apiv1.Namespace, error) {
+	return c.client.CoreV1().Namespaces().Get(ctx, teamName, metav1.GetOptions{})
+}
+
 func (c Client) SetupTeam(ctx context.Context, teamName string) (string, error) {
 	namespace := &apiv1.Namespace{
 		ObjectMeta: metav1.ObjectMeta{
@@ -110,7 +114,6 @@ func (c Client) ListTeams(ctx context.Context) ([]Team, error) {
 	namespaces, err := c.client.CoreV1().Namespaces().List(ctx, metav1.ListOptions{
 		LabelSelector: "player=true",
 	})
-
 	if err != nil {
 		return nil, err
 	}
@@ -132,4 +135,9 @@ func namespaceToTeam(namespace apiv1.Namespace) Team {
 		Hexcode:     annotations[PLEESAH_HEXCODE],
 		Progression: progression,
 	}
+}
+
+func (c Client) UpdateTeam(ctx context.Context, namespace *apiv1.Namespace) error {
+	_, err := c.client.CoreV1().Namespaces().Update(ctx, namespace, metav1.UpdateOptions{})
+	return err
 }
