@@ -86,13 +86,13 @@ func (c Client) getTeam(ctx context.Context, teamName string) (*apiv1.Namespace,
 	return c.client.CoreV1().Namespaces().Get(ctx, teamName, metav1.GetOptions{})
 }
 
-func (c Client) SetupTeam(ctx context.Context, teamName string) (string, error) {
+func (c Client) SetupTeam(ctx context.Context, team, hexcode string) (string, error) {
 	namespace := &apiv1.Namespace{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: teamName,
+			Name: team,
 			Annotations: map[string]string{
 				PLEESAH_TASK:        "0",
-				PLEESAH_HEXCODE:     "#123321",
+				PLEESAH_HEXCODE:     hexcode,
 				PLEESAH_COORDINATES: "[]",
 			},
 			Labels: map[string]string{
@@ -108,7 +108,7 @@ func (c Client) SetupTeam(ctx context.Context, teamName string) (string, error) 
 
 	serviceAccount := &apiv1.ServiceAccount{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: teamName,
+			Name: team,
 		},
 	}
 
@@ -120,7 +120,7 @@ func (c Client) SetupTeam(ctx context.Context, teamName string) (string, error) 
 	oneDay := int64(86400)
 	tokenRequest := &authenticationv1.TokenRequest{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: teamName,
+			Name: team,
 		},
 		Spec: authenticationv1.TokenRequestSpec{
 			ExpirationSeconds: &oneDay,
@@ -148,13 +148,13 @@ func (c Client) SetupTeam(ctx context.Context, teamName string) (string, error) 
 
 	roleBinding := rbacv1.RoleBinding{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: teamName,
+			Name: team,
 		},
 		Subjects: []rbacv1.Subject{
 			{
 				Kind:     "Group",
 				APIGroup: "rbac.authorization.k8s.io",
-				Name:     fmt.Sprintf("system:serviceaccounts:%s", teamName),
+				Name:     fmt.Sprintf("system:serviceaccounts:%s", team),
 			},
 		},
 		RoleRef: rbacv1.RoleRef{
@@ -168,7 +168,7 @@ func (c Client) SetupTeam(ctx context.Context, teamName string) (string, error) 
 		return "", err
 	}
 
-	return createKubeconfig(teamName, token.Status.Token, c.Endpoint, c.CA), nil
+	return createKubeconfig(team, token.Status.Token, c.Endpoint, c.CA), nil
 }
 
 func (c Client) ListTeams(ctx context.Context) ([]Team, error) {
