@@ -66,17 +66,16 @@ func (c Client) TeamNextTask(ctx context.Context, team string, task int) string 
 	oldTaskInt, err := strconv.Atoi(oldTaskString)
 	if err != nil {
 		c.log.Error("task is not int", "error", err, "team", team, "task", task)
-		return fmt.Sprintf("failed parsing old task as int: %s", &oldTaskString)
+		return fmt.Sprintf("failed parsing old task as int: %s", oldTaskString)
 	}
 
 	if task <= oldTaskInt {
-		return "task was lower than previous task"
+		return "task was lower than, or equal to previous task"
 	}
 
 	namespace.Annotations[PLEESAH_TASK] = fmt.Sprint(task)
 	if err := c.UpdateTeam(ctx, namespace); err != nil {
 		c.log.Error("failed updating with new task", "error", err, "team", team, "task", task)
-		//=http.Error(w, , http.StatusInternalServerError)
 		return "failed updating with new task"
 	}
 
@@ -192,7 +191,7 @@ func (c Client) ListTeams(ctx context.Context) ([]Team, error) {
 func namespaceToTeam(namespace apiv1.Namespace) Team {
 	annotations := namespace.GetAnnotations()
 	var progression []string
-	json.Unmarshal([]byte(annotations[PLEESAH_COORDINATES]), &progression)
+	_ = json.Unmarshal([]byte(annotations[PLEESAH_COORDINATES]), &progression)
 	return Team{
 		Name:        namespace.Name,
 		Hexcode:     annotations[PLEESAH_HEXCODE],
