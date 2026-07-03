@@ -13,7 +13,7 @@ func (a *api) TeamHandler() http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("POST /{team}/create", a.teamCreate)
 	mux.HandleFunc("POST /{team}/next-task", a.teamNextTask)
-	mux.HandleFunc("PUT /{team}/coordinates", a.teamAddCoordinates)
+	mux.HandleFunc("POST /{team}/progression", a.teamAddProgression)
 	mux.HandleFunc("GET /{team}/status/{resource}", a.teamResourceStatus)
 
 	return mux
@@ -81,42 +81,42 @@ func validateHexcode(hex string) bool {
 	return regexp.MustCompile(`^#?(?:[a-fA-F0-9]{6}|[a-fA-F0-9]{3})$`).Match([]byte(hex))
 }
 
-// Example: PUT /api/v1/team/{team}/coordinates
+// Example: POST /api/v1/team/{team}/progression
 // Payload: {x: 0, y: 1}
-func (a *api) teamAddCoordinates(w http.ResponseWriter, r *http.Request) {
+func (a *api) teamAddProgression(w http.ResponseWriter, r *http.Request) {
 	team := r.PathValue("team")
 	log := a.log.With("team", team)
-	type Coordinates struct {
+	type Progression struct {
 		X int
 		Y int
 	}
 
-	var coordinates Coordinates
-	if err := json.NewDecoder(r.Body).Decode(&coordinates); err != nil {
+	var progression Progression
+	if err := json.NewDecoder(r.Body).Decode(&progression); err != nil {
 		log.Error("failed parsing body", "error", err)
 		writeJsonMessage(w, map[string]any{
-			"error": "failed parsing body",
+			"error": "failed parsing progression",
 		}, http.StatusBadRequest)
 
 		return
 	}
 	defer r.Body.Close()
-	minifiedCoordinates := fmt.Sprintf("%d,%d", coordinates.X, coordinates.Y)
+	minifiedProgression := fmt.Sprintf("%d,%d", progression.X, progression.Y)
 
-	if err := a.k8s.TeamAddCoordinates(r.Context(), team, minifiedCoordinates); err != "" {
+	if err := a.k8s.TeamAddProgression(r.Context(), team, minifiedProgression); err != "" {
 		writeJsonMessage(w, map[string]any{
 			"error":       err,
 			"team":        team,
-			"coordinates": minifiedCoordinates,
+			"progression": minifiedProgression,
 		}, http.StatusInternalServerError)
 
 		return
 	}
 
 	writeJsonMessage(w, map[string]any{
-		"message":     "Coordinates was added",
+		"message":     "Progression was added",
 		"team":        team,
-		"coordinates": minifiedCoordinates,
+		"progression": minifiedProgression,
 	}, http.StatusOK)
 }
 

@@ -16,7 +16,7 @@ import (
 const (
 	PLEESAH_TASK        = "pleesah.io/task"
 	PLEESAH_HEXCODE     = "pleesah.io/hexcode"
-	PLEESAH_COORDINATES = "pleesah.io/coordinates"
+	PLEESAH_PROGRESSION = "pleesah.io/progression"
 )
 
 type Team struct {
@@ -25,7 +25,7 @@ type Team struct {
 	Progression []string `json:"progresjon"`
 }
 
-func (c Client) TeamAddCoordinates(ctx context.Context, team, minifiedCoordinates string) string {
+func (c Client) TeamAddProgression(ctx context.Context, team, minifiedProgression string) string {
 	log := c.log.With("team", team)
 	namespace, err := c.getTeam(ctx, team)
 	if err != nil {
@@ -33,21 +33,21 @@ func (c Client) TeamAddCoordinates(ctx context.Context, team, minifiedCoordinate
 		return "team was not found"
 	}
 
-	coordinatesString := namespace.Annotations[PLEESAH_COORDINATES]
-	var coordinates []string
-	if err := json.Unmarshal([]byte(coordinatesString), &coordinates); err != nil {
-		log.Error("failed unmarshaling coordinates", "error", err, "coordinates", coordinatesString)
-		return "failed reading coordinates"
+	progressionString := namespace.Annotations[PLEESAH_PROGRESSION]
+	var progression []string
+	if err := json.Unmarshal([]byte(progressionString), &progression); err != nil {
+		log.Error("failed unmarshaling progression", "error", err, "progression", progressionString)
+		return "failed reading progression"
 	}
 
-	coordinates = append(coordinates, minifiedCoordinates)
-	payload, err := json.Marshal(coordinates)
+	progression = append(progression, minifiedProgression)
+	payload, err := json.Marshal(progression)
 	if err != nil {
-		log.Error("failed marshaling coordinates", "error", err, "coordinates", coordinates[len(coordinates)-1])
-		return "failed writing coordinates"
+		log.Error("failed marshaling progression", "error", err, "progression", progression[len(progression)-1])
+		return "failed writing progression"
 	}
 
-	namespace.Annotations[PLEESAH_COORDINATES] = string(payload)
+	namespace.Annotations[PLEESAH_PROGRESSION] = string(payload)
 	if err := c.UpdateTeam(ctx, namespace); err != nil {
 		c.log.Error("failed storing team", "error", err)
 	}
@@ -93,7 +93,7 @@ func (c Client) SetupTeam(ctx context.Context, team, hexcode string) (string, er
 			Annotations: map[string]string{
 				PLEESAH_TASK:        "0",
 				PLEESAH_HEXCODE:     hexcode,
-				PLEESAH_COORDINATES: "[]",
+				PLEESAH_PROGRESSION: "[]",
 			},
 			Labels: map[string]string{
 				"player": "true",
@@ -191,7 +191,7 @@ func (c Client) ListTeams(ctx context.Context) ([]Team, error) {
 func namespaceToTeam(namespace apiv1.Namespace) Team {
 	annotations := namespace.GetAnnotations()
 	var progression []string
-	_ = json.Unmarshal([]byte(annotations[PLEESAH_COORDINATES]), &progression)
+	_ = json.Unmarshal([]byte(annotations[PLEESAH_PROGRESSION]), &progression)
 	return Team{
 		Name:        namespace.Name,
 		Hexcode:     annotations[PLEESAH_HEXCODE],
