@@ -20,12 +20,17 @@ const (
 )
 
 type Team struct {
-	Name        string   `json:"navn"`
-	Hexcode     string   `json:"hexKode"`
-	Progression []string `json:"progresjon"`
+	Name        string        `json:"navn"`
+	Hexcode     string        `json:"hexKode"`
+	Progression []Progression `json:"progresjon"`
 }
 
-func (c Client) TeamAddProgression(ctx context.Context, team, minifiedProgression string) string {
+type Progression struct {
+	X float32 `json:"x"`
+	Y float32 `json:"y"`
+}
+
+func (c Client) TeamAddProgression(ctx context.Context, team string, progression Progression) string {
 	log := c.log.With("team", team)
 	namespace, err := c.getTeam(ctx, team)
 	if err != nil {
@@ -34,16 +39,16 @@ func (c Client) TeamAddProgression(ctx context.Context, team, minifiedProgressio
 	}
 
 	progressionString := namespace.Annotations[PLEESAH_PROGRESSION]
-	var progression []string
-	if err := json.Unmarshal([]byte(progressionString), &progression); err != nil {
+	var progressions []Progression
+	if err := json.Unmarshal([]byte(progressionString), &progressions); err != nil {
 		log.Error("failed unmarshaling progression", "error", err, "progression", progressionString)
 		return "failed reading progression"
 	}
 
-	progression = append(progression, minifiedProgression)
-	payload, err := json.Marshal(progression)
+	progressions = append(progressions, progression)
+	payload, err := json.Marshal(progressions)
 	if err != nil {
-		log.Error("failed marshaling progression", "error", err, "progression", progression[len(progression)-1])
+		log.Error("failed marshaling progression", "error", err, "progression", progressions[len(progressions)-1])
 		return "failed writing progression"
 	}
 
@@ -190,12 +195,12 @@ func (c Client) ListTeams(ctx context.Context) ([]Team, error) {
 
 func namespaceToTeam(namespace apiv1.Namespace) Team {
 	annotations := namespace.GetAnnotations()
-	var progression []string
-	_ = json.Unmarshal([]byte(annotations[PLEESAH_PROGRESSION]), &progression)
+	var progressions []Progression
+	_ = json.Unmarshal([]byte(annotations[PLEESAH_PROGRESSION]), &progressions)
 	return Team{
 		Name:        namespace.Name,
 		Hexcode:     annotations[PLEESAH_HEXCODE],
-		Progression: progression,
+		Progression: progressions,
 	}
 }
 

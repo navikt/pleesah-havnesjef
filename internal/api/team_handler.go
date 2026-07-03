@@ -3,10 +3,11 @@ package api
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"regexp"
 	"strconv"
+
+	"github.com/navikt/pleesah-havnesjef/internal/k8s"
 )
 
 func (a *api) TeamHandler() http.Handler {
@@ -86,12 +87,8 @@ func validateHexcode(hex string) bool {
 func (a *api) teamAddProgression(w http.ResponseWriter, r *http.Request) {
 	team := r.PathValue("team")
 	log := a.log.With("team", team)
-	type Progression struct {
-		X float32
-		Y float32
-	}
 
-	var progression Progression
+	var progression k8s.Progression
 	if err := json.NewDecoder(r.Body).Decode(&progression); err != nil {
 		log.Error("failed parsing body", "error", err)
 		writeJsonMessage(w, map[string]any{
@@ -101,13 +98,12 @@ func (a *api) teamAddProgression(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer r.Body.Close()
-	minifiedProgression := fmt.Sprintf("%f,%f", progression.X, progression.Y)
 
-	if err := a.k8s.TeamAddProgression(r.Context(), team, minifiedProgression); err != "" {
+	if err := a.k8s.TeamAddProgression(r.Context(), team, progression); err != "" {
 		writeJsonMessage(w, map[string]any{
 			"error":       err,
 			"team":        team,
-			"progression": minifiedProgression,
+			"progression": progression,
 		}, http.StatusInternalServerError)
 
 		return
@@ -116,7 +112,7 @@ func (a *api) teamAddProgression(w http.ResponseWriter, r *http.Request) {
 	writeJsonMessage(w, map[string]any{
 		"message":     "Progression was added",
 		"team":        team,
-		"progression": minifiedProgression,
+		"progression": progression,
 	}, http.StatusOK)
 }
 
