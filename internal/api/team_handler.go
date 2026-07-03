@@ -87,8 +87,8 @@ func (a *api) teamAddProgression(w http.ResponseWriter, r *http.Request) {
 	team := r.PathValue("team")
 	log := a.log.With("team", team)
 	type Progression struct {
-		X int
-		Y int
+		X float32
+		Y float32
 	}
 
 	var progression Progression
@@ -101,7 +101,7 @@ func (a *api) teamAddProgression(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer r.Body.Close()
-	minifiedProgression := fmt.Sprintf("%d,%d", progression.X, progression.Y)
+	minifiedProgression := fmt.Sprintf("%f,%f", progression.X, progression.Y)
 
 	if err := a.k8s.TeamAddProgression(r.Context(), team, minifiedProgression); err != "" {
 		writeJsonMessage(w, map[string]any{
