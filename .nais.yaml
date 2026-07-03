@@ -8,6 +8,7 @@ spec:
     inbound:
       rules:
         - application: pleesah-game
+        - application: pleesah-skattekart
   envFrom:
     - secret: pleesah-havnesjef
     - configmap: pleesah-havnesjef
