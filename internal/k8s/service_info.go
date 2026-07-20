@@ -9,10 +9,10 @@ import (
 )
 
 type ServiceInfo struct {
-	Name      string
-	Type      v1.ServiceType
-	ClusterIP string
-	Ports     []v1.ServicePort
+	Name      string           `json:"name"`
+	Type      v1.ServiceType   `json:"type"`
+	ClusterIP string           `json:"clusterIP"`
+	Ports     []v1.ServicePort `json:"ports"`
 }
 
 func (c Client) ServiceInfo(ctx context.Context, team string) (*ServiceInfo, error) {

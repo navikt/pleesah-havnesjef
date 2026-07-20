@@ -8,11 +8,11 @@ import (
 )
 
 type DeploymentInfo struct {
-	Name      string
-	Desired   int32
-	Ready     int32
-	Available int32
-	Updated   int32
+	Name      string `json:"name"`
+	Desired   int32  `json:"desired"`
+	Ready     int32  `json:"ready"`
+	Available int32  `json:"available"`
+	Updated   int32  `json:"updated"`
 }
 
 func (c Client) DeploymentInfo(ctx context.Context, team string) (*DeploymentInfo, error) {

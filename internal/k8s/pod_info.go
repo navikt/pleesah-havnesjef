@@ -10,11 +10,11 @@ import (
 )
 
 type PodInfo struct {
-	Name     string
-	Phase    v1.PodPhase
-	Restarts int32
-	Node     string
-	Age      time.Duration
+	Name     string        `json:"name"`
+	Phase    v1.PodPhase   `json:"phase"`
+	Restarts int32         `json:"restarts"`
+	Node     string        `json:"node"`
+	Age      time.Duration `json:"age"`
 }
 
 func (c Client) PodInfo(ctx context.Context, team string) ([]PodInfo, error) {
