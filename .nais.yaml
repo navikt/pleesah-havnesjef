@@ -30,7 +30,7 @@ spec:
   egress:
   - to:
     - ipBlock:
-        cidr: 34.88.113.215/32
+        cidr: 35.228.51.70/32
     ports:
     - protocol: TCP
       port: 443
