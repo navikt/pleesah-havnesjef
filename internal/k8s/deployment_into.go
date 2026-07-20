@@ -15,8 +15,8 @@ type DeploymentInfo struct {
 	Updated   int32
 }
 
-func (c Client) DeploymentInfo(ctx context.Context, team, service string) (*DeploymentInfo, error) {
-	deployment, err := c.client.AppsV1().Deployments(team).Get(ctx, service, metav1.GetOptions{})
+func (c Client) DeploymentInfo(ctx context.Context, team string) (*DeploymentInfo, error) {
+	deployment, err := c.client.AppsV1().Deployments(team).Get(ctx, "deployment", metav1.GetOptions{})
 
 	if err != nil {
 		if k8serrors.IsNotFound(err) {

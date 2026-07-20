@@ -15,8 +15,8 @@ type ServiceInfo struct {
 	Ports     []v1.ServicePort
 }
 
-func (c Client) ServiceInfo(ctx context.Context, team, service string) (*ServiceInfo, error) {
-	svc, err := c.client.CoreV1().Services(team).Get(ctx, service, metav1.GetOptions{})
+func (c Client) ServiceInfo(ctx context.Context, team string) (*ServiceInfo, error) {
+	service, err := c.client.CoreV1().Services(team).Get(ctx, "service", metav1.GetOptions{})
 	if err != nil {
 		if k8serrors.IsNotFound(err) {
 			return nil, nil
@@ -26,9 +26,9 @@ func (c Client) ServiceInfo(ctx context.Context, team, service string) (*Service
 	}
 
 	return &ServiceInfo{
-		Name:      svc.Name,
-		Type:      svc.Spec.Type,
-		ClusterIP: svc.Spec.ClusterIP,
-		Ports:     svc.Spec.Ports,
+		Name:      service.Name,
+		Type:      service.Spec.Type,
+		ClusterIP: service.Spec.ClusterIP,
+		Ports:     service.Spec.Ports,
 	}, nil
 }

@@ -17,8 +17,8 @@ type PodInfo struct {
 	Age      time.Duration
 }
 
-func (c Client) PodInfo(ctx context.Context, team, service string) (*PodInfo, error) {
-	pod, err := c.client.CoreV1().Pods(team).Get(ctx, service, metav1.GetOptions{})
+func (c Client) PodInfo(ctx context.Context, team string) (*PodInfo, error) {
+	pod, err := c.client.CoreV1().Pods(team).Get(ctx, "pod", metav1.GetOptions{})
 	if err != nil {
 		if k8serrors.IsNotFound(err) {
 			return nil, nil
