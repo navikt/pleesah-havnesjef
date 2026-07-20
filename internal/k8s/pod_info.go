@@ -17,8 +17,8 @@ type PodInfo struct {
 	Age      time.Duration
 }
 
-func (c Client) PodInfo(ctx context.Context, team string) (*PodInfo, error) {
-	pod, err := c.client.CoreV1().Pods(team).Get(ctx, "pod", metav1.GetOptions{})
+func (c Client) PodInfo(ctx context.Context, team string) ([]PodInfo, error) {
+	pods, err := c.client.CoreV1().Pods(team).List(ctx, metav1.ListOptions{})
 	if err != nil {
 		if k8serrors.IsNotFound(err) {
 			return nil, nil
@@ -27,16 +27,20 @@ func (c Client) PodInfo(ctx context.Context, team string) (*PodInfo, error) {
 		return nil, err
 	}
 
-	var restarts int32
-	for _, cs := range pod.Status.ContainerStatuses {
-		restarts += cs.RestartCount
+	var list []PodInfo
+	for _, pod := range pods.Items {
+		var restarts int32
+		for _, cs := range pod.Status.ContainerStatuses {
+			restarts += cs.RestartCount
+		}
+		list = append(list, PodInfo{
+			Name:     pod.Name,
+			Phase:    pod.Status.Phase,
+			Restarts: restarts,
+			Node:     pod.Spec.NodeName,
+			Age:      time.Since(pod.CreationTimestamp.Time),
+		})
 	}
 
-	return &PodInfo{
-		Name:     pod.Name,
-		Phase:    pod.Status.Phase,
-		Restarts: restarts,
-		Node:     pod.Spec.NodeName,
-		Age:      time.Since(pod.CreationTimestamp.Time),
-	}, nil
+	return list, nil
 }
