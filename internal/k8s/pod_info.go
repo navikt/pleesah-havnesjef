@@ -2,6 +2,7 @@ package k8s
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	v1 "k8s.io/api/core/v1"
@@ -10,11 +11,11 @@ import (
 )
 
 type PodInfo struct {
-	Name     string        `json:"name"`
-	Phase    v1.PodPhase   `json:"phase"`
-	Restarts int32         `json:"restarts"`
-	Node     string        `json:"node"`
-	Age      time.Duration `json:"age"`
+	Name     string      `json:"name"`
+	Phase    v1.PodPhase `json:"phase"`
+	Restarts int32       `json:"restarts"`
+	Node     string      `json:"node"`
+	Age      string      `json:"age"`
 }
 
 func (c Client) PodInfo(ctx context.Context, team string) ([]PodInfo, error) {
@@ -33,12 +34,13 @@ func (c Client) PodInfo(ctx context.Context, team string) ([]PodInfo, error) {
 		for _, cs := range pod.Status.ContainerStatuses {
 			restarts += cs.RestartCount
 		}
+		age := time.Since(pod.CreationTimestamp.Time)
 		list = append(list, PodInfo{
 			Name:     pod.Name,
 			Phase:    pod.Status.Phase,
 			Restarts: restarts,
 			Node:     pod.Spec.NodeName,
-			Age:      time.Since(pod.CreationTimestamp.Time),
+			Age:      fmt.Sprintf("%dm %ds", int(age.Minutes()), int(age.Seconds())%60),
 		})
 	}
 
