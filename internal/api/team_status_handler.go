@@ -14,7 +14,7 @@ func (a *api) teamStatus(w http.ResponseWriter, r *http.Request) {
 	if podsErr != nil || servicesErr != nil || deploymentsErr != nil {
 		log.Error("failed checking status", "podsErr", podsErr, "servicesErr", servicesErr, "deploymentsErr", deploymentsErr)
 		writeJsonMessage(w, map[string]any{
-			"error":          "failed checking status",
+			"error":          "failed checking team status",
 			"podsErr":        podsErr,
 			"servicesErr":    servicesErr,
 			"deploymentsErr": deploymentsErr,

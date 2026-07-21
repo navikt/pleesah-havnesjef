@@ -15,8 +15,8 @@ type DeploymentInfo struct {
 	Updated   int32  `json:"updated"`
 }
 
-func (c Client) DeploymentInfo(ctx context.Context, team string) (*DeploymentInfo, error) {
-	deployment, err := c.client.AppsV1().Deployments(team).Get(ctx, "deployment", metav1.GetOptions{})
+func (c Client) DeploymentInfo(ctx context.Context, team string) ([]DeploymentInfo, error) {
+	deployments, err := c.client.AppsV1().Deployments(team).List(ctx, metav1.ListOptions{})
 
 	if err != nil {
 		if k8serrors.IsNotFound(err) {
@@ -26,11 +26,16 @@ func (c Client) DeploymentInfo(ctx context.Context, team string) (*DeploymentInf
 		return nil, err
 	}
 
-	return &DeploymentInfo{
-		Name:      deployment.Name,
-		Desired:   deployment.Status.Replicas,
-		Ready:     deployment.Status.ReadyReplicas,
-		Available: deployment.Status.AvailableReplicas,
-		Updated:   deployment.Status.UpdatedReplicas,
-	}, nil
+	var list []DeploymentInfo
+	for _, deployment := range deployments.Items {
+		list = append(list, DeploymentInfo{
+			Name:      deployment.Name,
+			Desired:   deployment.Status.Replicas,
+			Ready:     deployment.Status.ReadyReplicas,
+			Available: deployment.Status.AvailableReplicas,
+			Updated:   deployment.Status.UpdatedReplicas,
+		})
+	}
+
+	return list, nil
 }
