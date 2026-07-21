@@ -40,7 +40,7 @@ func (c Client) PodInfo(ctx context.Context, team string) ([]PodInfo, error) {
 			Phase:    pod.Status.Phase,
 			Restarts: restarts,
 			Node:     pod.Spec.NodeName,
-			Age:      fmt.Sprintf("%dm %ds", int(age.Minutes()), int(age.Seconds())%60),
+			Age:      fmt.Sprintf("%dh %dm %ds", int(age.Hours()), int(age.Minutes())%60, int(age.Seconds())%60),
 		})
 	}
 
