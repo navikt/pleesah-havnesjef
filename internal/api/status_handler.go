@@ -5,7 +5,7 @@ import (
 	"slices"
 )
 
-// Example: GET /api/v1/{team}/status/{deployment|pod|service}/?name={string}
+// Example: GET /team/{team}/status/{deployment|pod|service}/?name={string}
 func (a *api) teamResourceStatus(w http.ResponseWriter, r *http.Request) {
 	team := r.PathValue("team")
 	resource := r.PathValue("resource")

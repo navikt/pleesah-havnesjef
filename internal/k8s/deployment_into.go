@@ -17,7 +17,6 @@ type DeploymentInfo struct {
 
 func (c Client) DeploymentInfo(ctx context.Context, team string) ([]DeploymentInfo, error) {
 	deployments, err := c.client.AppsV1().Deployments(team).List(ctx, metav1.ListOptions{})
-
 	if err != nil {
 		if k8serrors.IsNotFound(err) {
 			return nil, nil

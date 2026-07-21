@@ -21,7 +21,7 @@ func (a *api) TeamHandler() http.Handler {
 	return mux
 }
 
-// Example: POST /api/v1/team/{team}/create?hex={code}
+// Example: POST /team/{team}/create?hex={code}
 func (a *api) teamCreate(w http.ResponseWriter, r *http.Request) {
 	team := r.PathValue("team")
 	log := a.log.With("team", team)
@@ -83,7 +83,7 @@ func validateHexcode(hex string) bool {
 	return regexp.MustCompile(`^#?(?:[a-fA-F0-9]{6}|[a-fA-F0-9]{3})$`).Match([]byte(hex))
 }
 
-// Example: POST /api/v1/team/{team}/progression
+// Example: POST /team/{team}/progression
 // Payload: {x: 0, y: 1}
 func (a *api) teamAddProgression(w http.ResponseWriter, r *http.Request) {
 	team := r.PathValue("team")
@@ -117,7 +117,7 @@ func (a *api) teamAddProgression(w http.ResponseWriter, r *http.Request) {
 	}, http.StatusOK)
 }
 
-// Example: POST /api/v1/team/{team}/next-task?task=int
+// Example: POST /team/{team}/next-task?task=int
 func (a *api) teamNextTask(w http.ResponseWriter, r *http.Request) {
 	team := r.PathValue("team")
 	log := a.log.With("team", team)
