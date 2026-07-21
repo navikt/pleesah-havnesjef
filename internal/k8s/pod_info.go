@@ -34,6 +34,7 @@ func (c Client) PodInfo(ctx context.Context, team string) ([]PodInfo, error) {
 		for _, cs := range pod.Status.ContainerStatuses {
 			restarts += cs.RestartCount
 		}
+
 		age := time.Since(pod.CreationTimestamp.Time)
 		list = append(list, PodInfo{
 			Name:     pod.Name,

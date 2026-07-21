@@ -12,12 +12,13 @@ func (a *api) teamStatus(w http.ResponseWriter, r *http.Request) {
 	deployments, deploymentsErr := a.k8s.DeploymentInfo(r.Context(), team)
 
 	if podsErr != nil || servicesErr != nil || deploymentsErr != nil {
-		log.Error("failed checking status", "podsErr", podsErr, "servicesErr", servicesErr, "deploymentsErr", deploymentsErr)
+		log.Error("failed checking status", "error_pods", podsErr, "error_services", servicesErr, "error_deployments", deploymentsErr)
 		writeJsonMessage(w, map[string]any{
 			"error":          "failed checking team status",
 			"podsErr":        podsErr,
 			"servicesErr":    servicesErr,
 			"deploymentsErr": deploymentsErr,
+			"name":           team,
 		}, http.StatusInternalServerError)
 
 		return
