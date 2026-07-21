@@ -52,14 +52,9 @@ func (a *api) teamResourceStatus(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	emoji := "❌"
-	if running {
-		emoji = "✅"
-	}
-
 	writeJsonMessage(w, map[string]any{
-		"running":  emoji,
-		"resource": resource,
-		"name":     name,
+		"isRunning": running,
+		"resource":  resource,
+		"name":      name,
 	}, http.StatusOK)
 }
