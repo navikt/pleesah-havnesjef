@@ -23,23 +23,29 @@ func (a *api) TeamHandler() http.Handler {
 
 // Example: POST /team/{team}/create?hex={code}
 func (a *api) teamCreate(w http.ResponseWriter, r *http.Request) {
+	type errorResponse struct {
+		Error   string `json:"error"`
+		Team    string `json:"team"`
+		Hexcode string `json:"hexcode"`
+	}
+
 	team := r.PathValue("team")
 	log := a.log.With("team", team)
 
 	if !validateTeam(team) {
 		a.log.Error("team is not valid")
-		writeJsonMessage(w, map[string]any{
-			"error": "team is not valid",
+		writeJsonMessage(w, errorResponse{
+			Error: "team is not valid",
 		}, http.StatusBadRequest)
-
 		return
 	}
 
 	hexcode := r.URL.Query().Get("hex")
 	if !validateHexcode(hexcode) {
 		a.log.Error("hex is not valid", "hex", hexcode)
-		writeJsonMessage(w, map[string]any{
-			"error": "hex is not valid",
+		writeJsonMessage(w, errorResponse{
+			Error: "hex is not valid",
+			Team:  team,
 		}, http.StatusBadRequest)
 
 		return
@@ -48,12 +54,11 @@ func (a *api) teamCreate(w http.ResponseWriter, r *http.Request) {
 	k8sconfig, err := a.k8s.SetupTeam(r.Context(), team, hexcode)
 	if err != nil {
 		log.Error("failed creating team", "error", err)
-		writeJsonMessage(w, map[string]any{
-			"error":   "failed creating team",
-			"team":    team,
-			"hexcode": hexcode,
+		writeJsonMessage(w, errorResponse{
+			Error:   "failed creating team",
+			Team:    team,
+			Hexcode: hexcode,
 		}, http.StatusInternalServerError)
-
 		return
 	}
 
@@ -62,9 +67,10 @@ func (a *api) teamCreate(w http.ResponseWriter, r *http.Request) {
 	buffer := new(bytes.Buffer)
 	if err = json.Compact(buffer, []byte(k8sconfig)); err != nil {
 		a.log.Error("failed minifying kubeconfig", "error", err)
-		writeJsonMessage(w, map[string]any{
-			"error": "",
-			"team":  team,
+		writeJsonMessage(w, errorResponse{
+			Error:   "failed creating payload for team",
+			Team:    team,
+			Hexcode: hexcode,
 		}, http.StatusInternalServerError)
 
 		return
@@ -86,14 +92,21 @@ func validateHexcode(hex string) bool {
 // Example: POST /team/{team}/progression
 // Payload: {x: 0, y: 1}
 func (a *api) teamAddProgression(w http.ResponseWriter, r *http.Request) {
+	type errorResponse struct {
+		Error       string          `json:"error"`
+		Team        string          `json:"team"`
+		Progression k8s.Progression `json:"progression"`
+	}
+
 	team := r.PathValue("team")
 	log := a.log.With("team", team)
 
 	var progression k8s.Progression
 	if err := json.NewDecoder(r.Body).Decode(&progression); err != nil {
 		log.Error("failed parsing body", "error", err)
-		writeJsonMessage(w, map[string]any{
-			"error": "failed parsing progression",
+		writeJsonMessage(w, errorResponse{
+			Error: "failed parsing progression",
+			Team:  team,
 		}, http.StatusBadRequest)
 
 		return
@@ -101,10 +114,10 @@ func (a *api) teamAddProgression(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
 	if err := a.k8s.TeamAddProgression(r.Context(), team, progression); err != "" {
-		writeJsonMessage(w, map[string]any{
-			"error":       err,
-			"team":        team,
-			"progression": progression,
+		writeJsonMessage(w, errorResponse{
+			Error:       err,
+			Team:        team,
+			Progression: progression,
 		}, http.StatusInternalServerError)
 
 		return
@@ -119,14 +132,21 @@ func (a *api) teamAddProgression(w http.ResponseWriter, r *http.Request) {
 
 // Example: POST /team/{team}/next-task?task=int
 func (a *api) teamNextTask(w http.ResponseWriter, r *http.Request) {
+	type errorResponse struct {
+		Error string `json:"error"`
+		Team  string `json:"team"`
+		Task  string `json:"task"`
+	}
+
 	team := r.PathValue("team")
 	log := a.log.With("team", team)
 
 	taskString := r.URL.Query().Get("task")
 	if taskString == "" {
 		a.log.Error("missing task query parameter")
-		writeJsonMessage(w, map[string]any{
-			"error": "missing task query parameter",
+		writeJsonMessage(w, errorResponse{
+			Error: "missing task query parameter",
+			Team:  team,
 		}, http.StatusBadRequest)
 
 		return
@@ -136,10 +156,10 @@ func (a *api) teamNextTask(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		a.log.Error("task is not int", "error", err, "task", taskString)
 
-		writeJsonMessage(w, map[string]any{
-			"error": "can not parse task as int",
-			"team":  team,
-			"task":  taskString,
+		writeJsonMessage(w, errorResponse{
+			Error: "can not parse task as int",
+			Team:  team,
+			Task:  taskString,
 		}, http.StatusBadRequest)
 
 		return
@@ -147,9 +167,10 @@ func (a *api) teamNextTask(w http.ResponseWriter, r *http.Request) {
 
 	if err := a.k8s.TeamNextTask(r.Context(), team, taskInt); err != "" {
 		log.Error("failed storing next task", "error", err)
-		writeJsonMessage(w, map[string]any{
-			"error": "failed storing task",
-			"team":  team,
+		writeJsonMessage(w, errorResponse{
+			Error: "failed storing task",
+			Team:  team,
+			Task:  taskString,
 		}, http.StatusInternalServerError)
 
 		return

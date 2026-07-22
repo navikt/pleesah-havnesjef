@@ -15,16 +15,17 @@ func (a *api) teamStatus(w http.ResponseWriter, r *http.Request) {
 		log.Error("failed checking status", "error_pods", podsErr, "error_services", servicesErr, "error_deployments", deploymentsErr)
 		writeJsonMessage(w, map[string]any{
 			"error":          "failed checking team status",
+			"team":           team,
 			"podsErr":        podsErr,
 			"servicesErr":    servicesErr,
 			"deploymentsErr": deploymentsErr,
-			"name":           team,
 		}, http.StatusInternalServerError)
 
 		return
 	}
 
 	writeJsonMessage(w, map[string]any{
+		"team":        team,
 		"pods":        pods,
 		"services":    services,
 		"deployments": deployments,
