@@ -138,20 +138,6 @@ func (c Client) SetupTeam(ctx context.Context, team, hexcode string) (string, er
 		return "", err
 	}
 
-	secret := apiv1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: "koordinatene-mine",
-		},
-		Data: map[string][]byte{
-			"KOORDINATER": []byte("59.9124° N, 10.7962° E"),
-		},
-	}
-
-	_, err = c.client.CoreV1().Secrets(namespace.Name).Create(ctx, &secret, metav1.CreateOptions{})
-	if err != nil && !k8serrors.IsAlreadyExists(err) {
-		return "", err
-	}
-
 	roleBinding := rbacv1.RoleBinding{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: team,
