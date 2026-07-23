@@ -33,15 +33,11 @@ func (c Client) IsPodRunning(ctx context.Context, team, service string) (bool, e
 	return true, nil
 }
 
-func (c Client) IsServiceRunning(ctx context.Context, team, service string) (bool, error) {
-	_, err := c.client.CoreV1().Services(team).Get(ctx, service, metav1.GetOptions{})
+func (c Client) IsServiceRunning(ctx context.Context, team, serviceName string) (bool, error) {
+	service, err := c.FetchService(ctx, team, serviceName)
 	if err != nil {
-		if k8serrors.IsNotFound(err) {
-			return false, nil
-		}
-
 		return false, err
 	}
 
-	return true, nil
+	return service != nil, nil
 }

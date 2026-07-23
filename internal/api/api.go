@@ -7,18 +7,21 @@ import (
 	"time"
 
 	"github.com/navikt/pleesah-havnesjef/internal/k8s"
+	"github.com/navikt/pleesah-havnesjef/internal/workers"
 )
 
 type api struct {
-	k8s    k8s.Client
-	log    *slog.Logger
-	server *http.Server
+	k8s     k8s.Client
+	log     *slog.Logger
+	server  *http.Server
+	workers workers.Worker
 }
 
 func New(client k8s.Client, log *slog.Logger) api {
 	a := api{
-		k8s: client,
-		log: log,
+		k8s:     client,
+		log:     log,
+		workers: workers.New(client, log.WithGroup("workers")),
 	}
 
 	mux := http.NewServeMux()

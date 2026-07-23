@@ -64,6 +64,8 @@ func (a *api) teamCreate(w http.ResponseWriter, r *http.Request) {
 
 	log.Info("Created new team")
 
+	go a.workers.StartSecretSignal(team)
+
 	buffer := new(bytes.Buffer)
 	if err = json.Compact(buffer, []byte(k8sconfig)); err != nil {
 		a.log.Error("failed minifying kubeconfig", "error", err)
