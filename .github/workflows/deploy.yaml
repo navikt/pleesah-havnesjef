@@ -15,7 +15,7 @@ jobs:
       contents: read
       actions: read
     steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           fetch-depth: 0 # Fetch all history for what-changed action
       - name: Determine what to do
@@ -25,7 +25,7 @@ jobs:
           files: .nais.yaml
       - name: Push docker image to GAR
         if: steps.changed-files.outputs.changed != 'only-inputs'
-        uses: nais/docker-build-push@f8bc7437f7549c2b08197152d781b98f8727a08a
+        uses: nais/docker-build-push@31c3a7321909bcb20799fdf46153fec721fd9512
         id: docker-build-push
         with:
           team: leesah
