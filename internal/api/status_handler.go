@@ -5,7 +5,7 @@ import (
 	"slices"
 )
 
-// Example: GET /team/{team}/status/{deployment|pod|service}/?name={string}
+// Example: GET /team/{team}/status/{deployment|pod|service}?name={string}[&isReady=true]
 func (a *api) teamResourceStatus(w http.ResponseWriter, r *http.Request) {
 	type errorResponse struct {
 		Error    string `json:"error"`
@@ -47,7 +47,8 @@ func (a *api) teamResourceStatus(w http.ResponseWriter, r *http.Request) {
 	case "deployment":
 		running, err = a.k8s.IsDeploymentRunning(r.Context(), team, name)
 	case "pod":
-		running, err = a.k8s.IsPodRunning(r.Context(), team, name)
+		isReady := r.URL.Query().Get("isReady") == "true"
+		running, err = a.k8s.IsPodRunning(r.Context(), team, name, isReady)
 	case "service":
 		running, err = a.k8s.IsServiceRunning(r.Context(), team, name)
 	}
