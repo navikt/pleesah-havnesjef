@@ -98,13 +98,16 @@ func (c Client) SetupTeam(ctx context.Context, team, hexcode string) (string, er
 			Name: team,
 			Annotations: map[string]string{
 				PLEESAH_TASK:        "0",
-				PLEESAH_HEXCODE:     hexcode,
 				PLEESAH_PROGRESSION: "[]",
 			},
 			Labels: map[string]string{
 				"player": "true",
 			},
 		},
+	}
+
+	if hexcode != "" {
+		namespace.ObjectMeta.Annotations[PLEESAH_HEXCODE] = hexcode
 	}
 
 	_, err := c.client.CoreV1().Namespaces().Create(ctx, namespace, metav1.CreateOptions{})

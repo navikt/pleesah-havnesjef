@@ -21,7 +21,7 @@ func (a *api) TeamHandler() http.Handler {
 	return mux
 }
 
-// Example: POST /team/{team}/create?hex={code}
+// Example: POST /team/{team}/create[?hex={code}]
 func (a *api) teamCreate(w http.ResponseWriter, r *http.Request) {
 	type errorResponse struct {
 		Error   string `json:"error"`
@@ -41,7 +41,7 @@ func (a *api) teamCreate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	hexcode := r.URL.Query().Get("hex")
-	if !validateHexcode(hexcode) {
+	if hexcode != "" && !validateHexcode(hexcode) {
 		a.log.Error("hex is not valid", "hex", hexcode)
 		writeJsonMessage(w, errorResponse{
 			Error: "hex is not valid",
