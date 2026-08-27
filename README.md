@@ -1,12 +1,13 @@
 # Pleesah havnesjef
 
-Denne har ansvaret for å administrere teams.
+Havnesjefen har ansvaret for å administrere teamene.
 
-Den setter opp følgende for hvert team:
+Når man oppretter et nytt team, så vil den sette opp følgende for hvert team:
 
 - Namespace
 - Service account
-- Secret
 - Rolebinding
 
-Når dette er gjort lager den en token for service accounten og viser en `KUBECONFIG` som teamet kan bruke.
+Og så lage et token for en service accounten og returnerer en `KUBECONFIG` som teamet kan bruke.
+
+
