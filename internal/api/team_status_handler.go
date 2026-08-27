@@ -10,24 +10,27 @@ func (a *api) teamStatus(w http.ResponseWriter, r *http.Request) {
 	pods, podsErr := a.k8s.PodInfo(r.Context(), team)
 	services, servicesErr := a.k8s.ServiceInfo(r.Context(), team)
 	deployments, deploymentsErr := a.k8s.DeploymentInfo(r.Context(), team)
+	netpols, netpolsErr := a.k8s.NetworkPolicyInfo(r.Context(), team)
 
-	if podsErr != nil || servicesErr != nil || deploymentsErr != nil {
-		log.Error("failed checking status", "error_pods", podsErr, "error_services", servicesErr, "error_deployments", deploymentsErr)
+	if podsErr != nil || servicesErr != nil || deploymentsErr != nil || netpolsErr != nil {
+		log.Error("failed checking status", "error_pods", podsErr, "error_services", servicesErr, "error_deployments", deploymentsErr, "error_netpols", netpolsErr)
 		writeJsonMessage(w, map[string]any{
 			"error":          "failed checking team status",
 			"team":           team,
 			"podsErr":        podsErr,
 			"servicesErr":    servicesErr,
 			"deploymentsErr": deploymentsErr,
+			"netpolsErr":     netpolsErr,
 		}, http.StatusInternalServerError)
 
 		return
 	}
 
 	writeJsonMessage(w, map[string]any{
-		"team":        team,
-		"pods":        pods,
-		"services":    services,
-		"deployments": deployments,
+		"team":            team,
+		"pods":            pods,
+		"services":        services,
+		"deployments":     deployments,
+		"networkPolicies": netpols,
 	}, http.StatusOK)
 }
