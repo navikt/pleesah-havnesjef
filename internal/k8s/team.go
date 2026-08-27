@@ -12,6 +12,7 @@ import (
 	rbacv1 "k8s.io/api/rbac/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
 const (
@@ -163,7 +164,7 @@ func (c Client) SetupTeam(ctx context.Context, team, hexcode string) (string, er
 		return "", err
 	}
 
-	networkPolicy := &networkingv1.NetworkPolicy{
+	denyAllNetworkPolicy := &networkingv1.NetworkPolicy{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: "deny-all",
 		},
@@ -175,7 +176,35 @@ func (c Client) SetupTeam(ctx context.Context, team, hexcode string) (string, er
 			},
 		},
 	}
-	_, err = c.client.NetworkingV1().NetworkPolicies(namespace.Name).Create(ctx, networkPolicy, metav1.CreateOptions{})
+	_, err = c.client.NetworkingV1().NetworkPolicies(namespace.Name).Create(ctx, denyAllNetworkPolicy, metav1.CreateOptions{})
+	if err != nil && !k8serrors.IsAlreadyExists(err) {
+		return "", err
+	}
+
+	AllowDNSNetworkPolicy := &networkingv1.NetworkPolicy{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: "allow-kube-dns",
+		},
+		Spec: networkingv1.NetworkPolicySpec{
+			PodSelector: metav1.LabelSelector{},
+			Egress: []networkingv1.NetworkPolicyEgressRule{
+				{
+					Ports: []networkingv1.NetworkPolicyPort{
+						{
+							Protocol: new(apiv1.ProtocolUDP),
+							Port: &intstr.IntOrString{
+								IntVal: 53,
+							},
+						},
+					},
+				},
+			},
+			PolicyTypes: []networkingv1.PolicyType{
+				networkingv1.PolicyTypeEgress,
+			},
+		},
+	}
+	_, err = c.client.NetworkingV1().NetworkPolicies(namespace.Name).Create(ctx, AllowDNSNetworkPolicy, metav1.CreateOptions{})
 	if err != nil && !k8serrors.IsAlreadyExists(err) {
 		return "", err
 	}
