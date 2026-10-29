@@ -6,7 +6,7 @@ import (
 )
 
 // Example: GET /teams
-func (a *api) TreasureMapHandler(w http.ResponseWriter, r *http.Request) {
+func (a *api) TeamsHandler(w http.ResponseWriter, r *http.Request) {
 	teams, err := a.k8s.ListTeams(r.Context())
 	if err != nil {
 		a.log.Error("failed listing teams", "error", err)

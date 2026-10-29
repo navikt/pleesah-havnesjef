@@ -7,26 +7,23 @@ import (
 	"time"
 
 	"github.com/navikt/pleesah-havnesjef/internal/k8s"
-	"github.com/navikt/pleesah-havnesjef/internal/workers"
 )
 
 type api struct {
-	k8s     k8s.Client
-	log     *slog.Logger
-	server  *http.Server
-	workers workers.Worker
+	k8s    k8s.Client
+	log    *slog.Logger
+	server *http.Server
 }
 
 func New(client k8s.Client, log *slog.Logger) api {
 	a := api{
-		k8s:     client,
-		log:     log,
-		workers: workers.New(client, log.WithGroup("workers")),
+		k8s: client,
+		log: log,
 	}
 
 	mux := http.NewServeMux()
 	mux.Handle("/team/", http.StripPrefix("/team", a.TeamHandler()))
-	mux.HandleFunc("GET /teams", a.TreasureMapHandler)
+	mux.HandleFunc("GET /teams", a.TeamsHandler)
 
 	server := &http.Server{
 		Addr:           ":8080",

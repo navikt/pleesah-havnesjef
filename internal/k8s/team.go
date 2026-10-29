@@ -2,7 +2,6 @@ package k8s
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"strconv"
 
@@ -16,9 +15,7 @@ import (
 )
 
 const (
-	PLEESAH_TASK        = "pleesah.io/task"
-	PLEESAH_HEXCODE     = "pleesah.io/hexcode"
-	PLEESAH_PROGRESSION = "pleesah.io/progression"
+	PLEESAH_TASK = "pleesah.io/task"
 )
 
 type Team struct {
@@ -30,36 +27,6 @@ type Team struct {
 type Progression struct {
 	X float32 `json:"x"`
 	Y float32 `json:"y"`
-}
-
-func (c Client) TeamAddProgression(ctx context.Context, team string, progression Progression) string {
-	log := c.log.With("team", team)
-	namespace, err := c.getTeam(ctx, team)
-	if err != nil {
-		log.Error("failed fetching team", "error", err)
-		return "team was not found"
-	}
-
-	progressionString := namespace.Annotations[PLEESAH_PROGRESSION]
-	var progressions []Progression
-	if err := json.Unmarshal([]byte(progressionString), &progressions); err != nil {
-		log.Error("failed unmarshaling progression", "error", err, "progression", progressionString)
-		return "failed reading progression"
-	}
-
-	progressions = append(progressions, progression)
-	payload, err := json.Marshal(progressions)
-	if err != nil {
-		log.Error("failed marshaling progression", "error", err, "progression", progressions[len(progressions)-1])
-		return "failed writing progression"
-	}
-
-	namespace.Annotations[PLEESAH_PROGRESSION] = string(payload)
-	if err := c.UpdateTeam(ctx, namespace); err != nil {
-		c.log.Error("failed storing team", "error", err)
-	}
-
-	return ""
 }
 
 func (c Client) TeamNextTask(ctx context.Context, team string, task int) string {
@@ -93,22 +60,17 @@ func (c Client) getTeam(ctx context.Context, teamName string) (*apiv1.Namespace,
 	return c.client.CoreV1().Namespaces().Get(ctx, teamName, metav1.GetOptions{})
 }
 
-func (c Client) SetupTeam(ctx context.Context, team, hexcode string) (string, error) {
+func (c Client) SetupTeam(ctx context.Context, team string) (string, error) {
 	namespace := &apiv1.Namespace{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: team,
 			Annotations: map[string]string{
-				PLEESAH_TASK:        "0",
-				PLEESAH_PROGRESSION: "[]",
+				PLEESAH_TASK: "0",
 			},
 			Labels: map[string]string{
 				"player": "true",
 			},
 		},
-	}
-
-	if hexcode != "" {
-		namespace.ObjectMeta.Annotations[PLEESAH_HEXCODE] = hexcode
 	}
 
 	_, err := c.client.CoreV1().Namespaces().Create(ctx, namespace, metav1.CreateOptions{})
@@ -222,22 +184,12 @@ func (c Client) ListTeams(ctx context.Context) ([]Team, error) {
 
 	teams := make([]Team, len(namespaces.Items))
 	for i, item := range namespaces.Items {
-		team := namespaceToTeam(item)
-		teams[i] = team
+		teams[i] = Team{
+			Name: item.Name,
+		}
 	}
 
 	return teams, nil
-}
-
-func namespaceToTeam(namespace apiv1.Namespace) Team {
-	annotations := namespace.GetAnnotations()
-	var progressions []Progression
-	_ = json.Unmarshal([]byte(annotations[PLEESAH_PROGRESSION]), &progressions)
-	return Team{
-		Name:        namespace.Name,
-		Hexcode:     annotations[PLEESAH_HEXCODE],
-		Progression: progressions,
-	}
 }
 
 func (c Client) UpdateTeam(ctx context.Context, namespace *apiv1.Namespace) error {
