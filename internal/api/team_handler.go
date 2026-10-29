@@ -12,7 +12,6 @@ func (a *api) TeamHandler() http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("POST /{team}/create", a.teamCreate)
 	mux.HandleFunc("POST /{team}/next-task", a.teamNextTask)
-	mux.HandleFunc("GET /{team}/status/{resource}", a.teamResourceStatus)
 	mux.HandleFunc("GET /{team}/status", a.teamStatus)
 
 	return mux

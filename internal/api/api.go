@@ -23,7 +23,6 @@ func New(client k8s.Client, log *slog.Logger) api {
 
 	mux := http.NewServeMux()
 	mux.Handle("/team/", http.StripPrefix("/team", a.TeamHandler()))
-	mux.HandleFunc("GET /teams", a.TeamsHandler)
 
 	server := &http.Server{
 		Addr:           ":8080",
